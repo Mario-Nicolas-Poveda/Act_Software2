@@ -673,6 +673,15 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Monitor de conexión para depuración
+        db.ref(".info/connected").on("value", (snap) => {
+            if (snap.val() === true) {
+                console.log("🟢 Conexión con Firebase establecida.");
+            } else {
+                console.warn("🔴 Conexión con Firebase perdida.");
+            }
+        });
+
         // Data
         const questions = [
             {
@@ -936,14 +945,13 @@
         }
 
         function adminStartQuiz() {
-            console.log("Intentando iniciar prueba en Firebase...");
+            // Intentar escribir en Firebase y avisar al usuario
             db.ref('quizStarted').set(true)
                 .then(() => {
-                    console.log("Estado de prueba actualizado en Firebase.");
+                    alert("¡CONEXIÓN EXITOSA! La prueba ha iniciado para todos.");
                 })
                 .catch((error) => {
-                    console.error("Error de escritura en Firebase:", error);
-                    alert("Error al conectar con Firebase: " + error.message + ". Verifica las Reglas en la consola de Firebase.");
+                    alert("ERROR DE CONEXIÓN: " + error.message + "\n\nVerifica que hayas publicado las Reglas (read: true, write: true) en Firebase.");
                 });
         }
 
