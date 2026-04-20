@@ -668,7 +668,7 @@
             appId: "1:160619363653:web:c03cbc89083feeb8fa122c",
             measurementId: "G-NB90GRGEBS"
         };
-        
+
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -936,14 +936,24 @@
         }
 
         function adminStartQuiz() {
-            db.ref('quizStarted').set(true);
+            console.log("Intentando iniciar prueba en Firebase...");
+            db.ref('quizStarted').set(true)
+                .then(() => {
+                    console.log("Estado de prueba actualizado en Firebase.");
+                })
+                .catch((error) => {
+                    console.error("Error de escritura en Firebase:", error);
+                    alert("Error al conectar con Firebase: " + error.message + ". Verifica las Reglas en la consola de Firebase.");
+                });
         }
 
         function updateAdminQuizStatus() {
+            const banner = document.getElementById('quizStatusBanner');
+            const startBtn = document.getElementById('startQuizBtn');
+
             db.ref('quizStarted').on('value', (snapshot) => {
                 const isActive = snapshot.val() === true;
-                const banner = document.getElementById('quizStatusBanner');
-                const startBtn = document.getElementById('startQuizBtn');
+                console.log("Estado del quiz sincronizado:", isActive);
 
                 if (isActive) {
                     banner.className = 'admin-quiz-status active';
@@ -954,6 +964,8 @@
                     banner.textContent = '🔴 La prueba NO ha iniciado';
                     startBtn.classList.remove('hidden');
                 }
+            }, (error) => {
+                console.error("Error al escuchar estado del quiz:", error);
             });
         }
 
@@ -1114,7 +1126,7 @@
 
             // Guardar en Firebase (Centralizado)
             db.ref('results').push(result);
-            
+
             saveSession();
             showResults();
         }
@@ -1153,7 +1165,7 @@
 
         function displayAdminResults() {
             const container = document.getElementById('resultsTableContainer');
-            
+
             // Escuchar resultados de Firebase en tiempo real
             db.ref('results').on('value', (snapshot) => {
                 const results = [];
