@@ -653,7 +653,26 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
+        // --- CONFIGURACIÓN DE FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZdnUiuFzJXvCunT9S-ZOMfTg763dSJTI",
+            authDomain: "actsoftware2-94a2e.firebaseapp.com",
+            databaseURL: "https://actsoftware2-94a2e-default-rtdb.firebaseio.com",
+            projectId: "actsoftware2-94a2e",
+            storageBucket: "actsoftware2-94a2e.appspot.com",
+            messagingSenderId: "160619363653",
+            appId: "1:160619363653:web:c03cbc89083feeb8fa122c",
+            measurementId: "G-NB90GRGEBS"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         // Data
         const questions = [
             {
@@ -888,26 +907,17 @@
             document.getElementById('waitingUserId').textContent = state.userId;
             saveSession();
 
-            // Verificar si la prueba ya fue iniciada por el admin
-            if (localStorage.getItem('quizStarted') === 'true') {
-                startQuiz();
-                return;
-            }
-
-            // Polling: revisar cada segundo si el admin inició la prueba
-            state.waitingInterval = setInterval(() => {
-                if (localStorage.getItem('quizStarted') === 'true') {
-                    clearInterval(state.waitingInterval);
+            // Sincronización en tiempo real con Firebase
+            // Escuchar si el admin inicia la prueba
+            db.ref('quizStarted').on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    db.ref('quizStarted').off(); // Dejar de escuchar una vez iniciado
                     startQuiz();
                 }
-            }, 1000);
+            });
         }
 
         function startQuiz() {
-            if (state.waitingInterval) {
-                clearInterval(state.waitingInterval);
-            }
-
             // Solo inicializar si no viene de una sesión restaurada
             if (state.shuffledQuestions.length === 0) {
                 state.shuffledQuestions = shuffleArray(questions);
@@ -926,24 +936,25 @@
         }
 
         function adminStartQuiz() {
-            localStorage.setItem('quizStarted', 'true');
-            updateAdminQuizStatus();
+            db.ref('quizStarted').set(true);
         }
 
         function updateAdminQuizStatus() {
-            const isActive = localStorage.getItem('quizStarted') === 'true';
-            const banner = document.getElementById('quizStatusBanner');
-            const startBtn = document.getElementById('startQuizBtn');
+            db.ref('quizStarted').on('value', (snapshot) => {
+                const isActive = snapshot.val() === true;
+                const banner = document.getElementById('quizStatusBanner');
+                const startBtn = document.getElementById('startQuizBtn');
 
-            if (isActive) {
-                banner.className = 'admin-quiz-status active';
-                banner.textContent = '🟢 La prueba está EN CURSO';
-                startBtn.classList.add('hidden');
-            } else {
-                banner.className = 'admin-quiz-status inactive';
-                banner.textContent = '🔴 La prueba NO ha iniciado';
-                startBtn.classList.remove('hidden');
-            }
+                if (isActive) {
+                    banner.className = 'admin-quiz-status active';
+                    banner.textContent = '🟢 La prueba está EN CURSO';
+                    startBtn.classList.add('hidden');
+                } else {
+                    banner.className = 'admin-quiz-status inactive';
+                    banner.textContent = '🔴 La prueba NO ha iniciado';
+                    startBtn.classList.remove('hidden');
+                }
+            });
         }
 
         function displayQuestion() {
@@ -1101,13 +1112,11 @@
                 timestamp: Date.now()
             };
 
-            let results = JSON.parse(localStorage.getItem('quizResults') || '[]');
-            results.push(result);
-            localStorage.setItem('quizResults', JSON.stringify(results));
-
-            // Guardar sesión como pantalla de resultados y mostrar
-            showResults();
+            // Guardar en Firebase (Centralizado)
+            db.ref('results').push(result);
+            
             saveSession();
+            showResults();
         }
 
         function showResults() {
@@ -1143,54 +1152,62 @@
         }
 
         function displayAdminResults() {
-            const results = JSON.parse(localStorage.getItem('quizResults') || '[]');
             const container = document.getElementById('resultsTableContainer');
+            
+            // Escuchar resultados de Firebase en tiempo real
+            db.ref('results').on('value', (snapshot) => {
+                const results = [];
+                snapshot.forEach((childSnapshot) => {
+                    results.push(childSnapshot.val());
+                });
 
-            if (results.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>No hay resultados registrados aún.</p></div>';
-                return;
-            }
+                if (results.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p>No hay resultados registrados todavía.</p>
+                            <p>Los resultados aparecerán aquí a medida que los estudiantes completen la prueba.</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-            // Sort by timestamp descending
-            results.sort((a, b) => b.timestamp - a.timestamp);
+                // Ordenar por fecha (más recientes primero)
+                results.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            let html = `
-                <table class="results-table">
-                    <thead>
+                let html = `
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>ID</th>
+                                <th>Puntaje</th>
+                                <th>Respuestas</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                results.forEach(result => {
+                    const scoreClass = result.score >= 4.5 ? 'excellent' : (result.score >= 3.5 ? 'good' : 'fair');
+                    html += `
                         <tr>
-                            <th>Nombre</th>
-                            <th>ID</th>
-                            <th>Calificación</th>
-                            <th>Correctas</th>
-                            <th>Fecha y Hora</th>
+                            <td><strong>${result.username}</strong></td>
+                            <td>${result.userId}</td>
+                            <td><span class="score-badge ${scoreClass}">${result.score}</span></td>
+                            <td>${result.correctAnswers} / 10</td>
+                            <td>${result.date}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            results.forEach(result => {
-                let badgeClass = 'poor';
-                if (result.score >= 4.5) badgeClass = 'excellent';
-                else if (result.score >= 3.5) badgeClass = 'good';
-                else if (result.score >= 2.5) badgeClass = 'fair';
+                    `;
+                });
 
                 html += `
-                    <tr>
-                        <td>${result.username}</td>
-                        <td>${result.userId}</td>
-                        <td><span class="score-badge ${badgeClass}">${result.score} / 5.0</span></td>
-                        <td>${result.correctAnswers} / 10</td>
-                        <td>${result.date}</td>
-                    </tr>
+                        </tbody>
+                    </table>
                 `;
+
+                container.innerHTML = html;
             });
-
-            html += `
-                    </tbody>
-                </table>
-            `;
-
-            container.innerHTML = html;
         }
 
         function exportToCSV() {
@@ -1221,10 +1238,10 @@
         }
 
         function clearAllResults() {
-            if (confirm('¿Estás seguro de que deseas eliminar TODOS los resultados? Esta acción no se puede deshacer.')) {
-                localStorage.removeItem('quizResults');
-                displayAdminResults();
-                alert('Todos los resultados han sido eliminados.');
+            if (confirm('¿Estás seguro de que deseas eliminar TODOS los resultados de la NUBE? Esta acción no se puede deshacer.')) {
+                db.ref('results').remove();
+                db.ref('quizStarted').set(false); // Resetear también el estado de la prueba
+                alert('Todos los resultados han sido eliminados y la prueba se ha reiniciado.');
             }
         }
 
