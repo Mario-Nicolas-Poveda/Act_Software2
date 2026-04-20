@@ -671,7 +671,7 @@
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database("https://actsoftware2-94a2e-default-rtdb.firebaseio.com/");
+        const db = firebase.database();
 
         // Monitor de conexión para depuración
         db.ref(".info/connected").on("value", (snap) => {
