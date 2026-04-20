@@ -369,18 +369,42 @@
         }
 
         .score-badge.excellent {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
         }
 
         .score-badge.good {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
         }
 
         .score-badge.fair {
-            background: #fff3cd;
-            color: #856404;
+            background: rgba(234, 179, 8, 0.2);
+            color: #facc15;
+            border: 1px solid rgba(250, 204, 21, 0.3);
+        }
+
+        .score-badge.in-progress {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(192, 132, 252, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(192, 132, 252, 0);
+            }
         }
 
         .score-badge.poor {
@@ -916,6 +940,18 @@
             // Si no es admin, es estudiante
             state.username = username;
             state.userId = userId;
+
+            // Registrar al alumno como "En curso" en Firebase
+            db.ref('results/' + userId).set({
+                username: username,
+                userId: userId,
+                score: 'En curso',
+                correctAnswers: 0,
+                date: new Date().toLocaleString(),
+                timestamp: Date.now(),
+                status: 'En curso'
+            });
+
             showWaitingScreen();
         }
 
@@ -956,10 +992,7 @@
 
         function adminStartQuiz() {
             // Intentar escribir en Firebase
-            db.ref('quizStarted').set(true)
-                .catch((error) => {
-                    alert("ERROR DE CONEXIÓN: " + error.message + "\n\nVerifica las Reglas en la consola de Firebase.");
-                });
+            db.ref('quizStarted').set(true);
         }
 
         function updateAdminQuizStatus() {
@@ -1136,7 +1169,8 @@
                 score: score.toFixed(2),
                 correctAnswers: correctCount,
                 date: new Date().toLocaleString('es-ES'),
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                status: 'Completado'
             };
 
             // Guardar en Firebase (Centralizado - Usando userId como clave para evitar duplicados)
@@ -1212,6 +1246,7 @@
                     <table class="results-table">
                         <thead>
                             <tr>
+                                <th>#</th>
                                 <th>Usuario</th>
                                 <th>ID</th>
                                 <th>Puntaje</th>
@@ -1222,14 +1257,19 @@
                         <tbody>
                 `;
 
-                results.forEach(result => {
-                    const scoreClass = result.score >= 4.5 ? 'excellent' : (result.score >= 3.5 ? 'good' : 'fair');
+                results.forEach((result, index) => {
+                    const isEnCurso = result.score === 'En curso';
+                    const scoreClass = isEnCurso ? 'in-progress' : (result.score >= 4.5 ? 'excellent' : (result.score >= 3.5 ? 'good' : 'fair'));
+                    const scoreDisplay = isEnCurso ? '⌛ En curso' : result.score;
+                    const answersDisplay = isEnCurso ? '--' : `${result.correctAnswers} / 10`;
+
                     html += `
                         <tr>
+                            <td>${index + 1}</td>
                             <td><strong>${result.username}</strong></td>
                             <td>${result.userId}</td>
-                            <td><span class="score-badge ${scoreClass}">${result.score}</span></td>
-                            <td>${result.correctAnswers} / 10</td>
+                            <td><span class="score-badge ${scoreClass}">${scoreDisplay}</span></td>
+                            <td>${answersDisplay}</td>
                             <td>${result.date}</td>
                         </tr>
                     `;
