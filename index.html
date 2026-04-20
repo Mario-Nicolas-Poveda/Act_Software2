@@ -653,24 +653,25 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Usar la versión completa de Firebase para asegurar compatibilidad -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase.js"></script>
 
     <script>
         // --- CONFIGURACIÓN DE FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyBZdnUiuFzJXvCunT9S-ZOMfTg763dSJTI",
             authDomain: "actsoftware2-94a2e.firebaseapp.com",
-            databaseURL: "https://actsoftware2-94a2e-default-rtdb.firebaseio.com/",
+            databaseURL: "https://actsoftware2-94a2e-default-rtdb.firebaseio.com",
             projectId: "actsoftware2-94a2e",
             storageBucket: "actsoftware2-94a2e.firebasestorage.app",
             messagingSenderId: "160619363653",
-            appId: "1:160619363653:web:c03cbc89083feeb8fa122c",
-            measurementId: "G-NB90GRGEBS"
+            appId: "1:160619363653:web:c03cbc89083feeb8fa122c"
         };
 
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
+        // Inicialización ultra-segura
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
         // Monitor de conexión para depuración
