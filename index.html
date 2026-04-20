@@ -656,9 +656,12 @@
             <div class="content">
                 <div id="quizStatusBanner" class="admin-quiz-status inactive">🔴 La prueba NO ha iniciado</div>
 
-                <div style="margin-bottom: 25px;">
+                <div style="margin-bottom: 25px; display: flex; gap: 15px; justify-content: center;">
                     <button id="startQuizBtn" onclick="adminStartQuiz()" class="start-quiz-btn">🚀 Iniciar Prueba para
                         Todos</button>
+                    <button id="stopQuizBtn" onclick="adminStopQuiz()" class="btn btn-danger hidden"
+                        style="background: #dc3545; flex: 1; max-width: 300px; font-weight: bold; padding: 15px;">🛑
+                        Parar Prueba</button>
                 </div>
 
                 <div class="admin-header">
@@ -963,11 +966,18 @@
             saveSession();
 
             // Sincronización en tiempo real con Firebase
-            // Escuchar si el admin inicia la prueba
+            // Escuchar si el admin inicia o detiene la prueba
             db.ref('quizStarted').on('value', (snapshot) => {
-                if (snapshot.val() === true) {
-                    db.ref('quizStarted').off(); // Dejar de escuchar una vez iniciado
+                const quizStarted = snapshot.val();
+
+                // Si estamos en espera y la prueba inicia
+                if (quizStarted === true && !document.getElementById('waitingScreen').classList.contains('hidden')) {
                     startQuiz();
+                }
+                // Si la prueba se detiene mientras estamos en el quiz
+                else if (quizStarted === false && !document.getElementById('quizScreen').classList.contains('hidden')) {
+                    alert('La prueba ha sido detenida por el administrador.');
+                    backToLogin();
                 }
             });
         }
@@ -995,9 +1005,16 @@
             db.ref('quizStarted').set(true);
         }
 
+        function adminStopQuiz() {
+            if (confirm('¿Estás seguro de que deseas PARAR la prueba para todos los alumnos? Serán desconectados inmediatamente.')) {
+                db.ref('quizStarted').set(false);
+            }
+        }
+
         function updateAdminQuizStatus() {
             const banner = document.getElementById('quizStatusBanner');
             const startBtn = document.getElementById('startQuizBtn');
+            const stopBtn = document.getElementById('stopQuizBtn');
 
             db.ref('quizStarted').on('value', (snapshot) => {
                 const isActive = snapshot.val() === true;
@@ -1007,10 +1024,12 @@
                     banner.className = 'admin-quiz-status active';
                     banner.textContent = '🟢 La prueba está EN CURSO';
                     startBtn.classList.add('hidden');
+                    stopBtn.classList.remove('hidden');
                 } else {
                     banner.className = 'admin-quiz-status inactive';
                     banner.textContent = '🔴 La prueba NO ha iniciado';
                     startBtn.classList.remove('hidden');
+                    stopBtn.classList.add('hidden');
                 }
             }, (error) => {
                 console.error("Error al escuchar estado del quiz:", error);
