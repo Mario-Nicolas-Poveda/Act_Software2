@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actividad</title>
+    <title>Telemetría de Precisión - Quiz</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -21,7 +20,7 @@
             justify-content: center;
             padding: 20px;
         }
-
+        
         .container {
             max-width: 800px;
             width: 100%;
@@ -30,32 +29,32 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
-
+        
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 30px 20px;
             text-align: center;
         }
-
+        
         .header h1 {
             font-size: 28px;
             margin-bottom: 5px;
         }
-
+        
         .header p {
             font-size: 14px;
             opacity: 0.9;
         }
-
+        
         .content {
             padding: 40px;
         }
-
+        
         .form-group {
             margin-bottom: 20px;
         }
-
+        
         label {
             display: block;
             font-size: 14px;
@@ -63,7 +62,7 @@
             color: #333;
             margin-bottom: 8px;
         }
-
+        
         input[type="text"],
         input[type="number"],
         input[type="password"],
@@ -75,7 +74,7 @@
             font-size: 14px;
             transition: all 0.3s;
         }
-
+        
         input[type="text"]:focus,
         input[type="number"]:focus,
         input[type="password"]:focus,
@@ -84,7 +83,7 @@
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-
+        
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -97,24 +96,24 @@
             transition: all 0.3s;
             width: 100%;
         }
-
+        
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
-
+        
         button:active {
             transform: translateY(0);
         }
-
+        
         .hidden {
             display: none;
         }
-
+        
         .quiz-container {
             margin-bottom: 20px;
         }
-
+        
         .question-header {
             display: flex;
             justify-content: space-between;
@@ -123,13 +122,13 @@
             padding-bottom: 15px;
             border-bottom: 2px solid #f0f0f0;
         }
-
+        
         .question-number {
             font-size: 14px;
             color: #666;
             font-weight: 500;
         }
-
+        
         .timer {
             font-size: 14px;
             font-weight: 600;
@@ -137,7 +136,7 @@
             border-radius: 4px;
             background: #f0f0f0;
         }
-
+        
         .timer.warning {
             background: #dc3545;
             color: #fff;
@@ -148,7 +147,7 @@
             animation: pulse-urgent 0.8s infinite;
             transition: all 0.3s ease;
         }
-
+        
         .timer.critical {
             background: #b71c1c;
             color: #fff;
@@ -159,39 +158,21 @@
             animation: pulse-urgent 0.5s infinite;
             transition: all 0.3s ease;
         }
-
+        
         @keyframes pulse-urgent {
-
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1.3);
-            }
-
-            50% {
-                opacity: 0.85;
-                transform: scale(1.4);
-            }
+            0%, 100% { opacity: 1; transform: scale(1.3); }
+            50% { opacity: 0.85; transform: scale(1.4); }
         }
-
+        
         .timer.critical {
             animation-name: pulse-critical;
         }
-
+        
         @keyframes pulse-critical {
-
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1.5);
-            }
-
-            50% {
-                opacity: 0.8;
-                transform: scale(1.6);
-            }
+            0%, 100% { opacity: 1; transform: scale(1.5); }
+            50% { opacity: 0.8; transform: scale(1.6); }
         }
-
+        
         .question-text {
             font-size: 16px;
             font-weight: 500;
@@ -199,13 +180,13 @@
             margin-bottom: 20px;
             line-height: 1.6;
         }
-
+        
         .options {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-
+        
         .option {
             display: flex;
             align-items: center;
@@ -215,51 +196,51 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-
+        
         .option:hover {
             border-color: #667eea;
             background: #f5f7ff;
         }
-
+        
         .option input[type="radio"] {
             margin-right: 12px;
             cursor: pointer;
             width: 18px;
             height: 18px;
         }
-
+        
         .option .option-label {
             margin: 0;
             cursor: pointer;
             font-weight: 400;
             flex: 1;
         }
-
+        
         .option.selected {
             border-color: #667eea;
             background: #f5f7ff;
         }
-
+        
         .quiz-buttons {
             display: flex;
             gap: 10px;
             margin-top: 30px;
         }
-
+        
         .quiz-buttons button {
             flex: 1;
         }
-
+        
         .quiz-buttons button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
+        
         .results-container {
             text-align: center;
             padding: 40px 20px;
         }
-
+        
         .score-circle {
             width: 150px;
             height: 150px;
@@ -274,20 +255,20 @@
             font-size: 50px;
             font-weight: bold;
         }
-
+        
         .score-circle p {
             font-size: 16px;
             opacity: 0.9;
             margin-top: 5px;
         }
-
+        
         .results-message {
             font-size: 18px;
             font-weight: 600;
             color: #333;
             margin-bottom: 30px;
         }
-
+        
         .results-details {
             background: #f5f7ff;
             padding: 20px;
@@ -295,17 +276,17 @@
             text-align: left;
             margin-bottom: 30px;
         }
-
+        
         .results-details p {
             font-size: 14px;
             color: #666;
             margin-bottom: 8px;
         }
-
+        
         .results-details strong {
             color: #333;
         }
-
+        
         /* Admin Panel */
         .admin-header {
             display: flex;
@@ -315,33 +296,33 @@
             padding-bottom: 20px;
             border-bottom: 2px solid #f0f0f0;
         }
-
+        
         .admin-header h2 {
             font-size: 24px;
             color: #333;
         }
-
+        
         .admin-buttons {
             display: flex;
             gap: 10px;
         }
-
+        
         .admin-buttons button {
             padding: 10px 20px;
             font-size: 14px;
             width: auto;
         }
-
+        
         .results-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
         }
-
+        
         .results-table thead {
             background: #f5f7ff;
         }
-
+        
         .results-table th {
             padding: 12px;
             text-align: left;
@@ -349,17 +330,17 @@
             color: #333;
             border-bottom: 2px solid #ddd;
         }
-
+        
         .results-table td {
             padding: 12px;
             border-bottom: 1px solid #ddd;
             color: #666;
         }
-
+        
         .results-table tr:hover {
             background: #f9f9f9;
         }
-
+        
         .score-badge {
             display: inline-block;
             padding: 6px 12px;
@@ -367,36 +348,36 @@
             font-weight: 600;
             font-size: 13px;
         }
-
+        
         .score-badge.excellent {
             background: #d4edda;
             color: #155724;
         }
-
+        
         .score-badge.good {
             background: #d1ecf1;
             color: #0c5460;
         }
-
+        
         .score-badge.fair {
             background: #fff3cd;
             color: #856404;
         }
-
+        
         .score-badge.poor {
             background: #f8d7da;
             color: #721c24;
         }
-
+        
         .back-button {
             background: #6c757d;
             margin-bottom: 20px;
         }
-
+        
         .back-button:hover {
             box-shadow: 0 10px 20px rgba(108, 117, 125, 0.3);
         }
-
+        
         .loading {
             display: inline-block;
             width: 20px;
@@ -406,34 +387,29 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
+        
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-
+        
         .empty-state {
             text-align: center;
             padding: 40px 20px;
             color: #999;
         }
-
+        
         .empty-state p {
             font-size: 16px;
             margin-bottom: 10px;
         }
-
+        
         /* Waiting Screen */
         .waiting-container {
             text-align: center;
             padding: 60px 20px;
         }
-
+        
         .waiting-spinner {
             width: 60px;
             height: 60px;
@@ -443,20 +419,20 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 30px;
         }
-
+        
         .waiting-container h2 {
             font-size: 22px;
             color: #333;
             margin-bottom: 12px;
         }
-
+        
         .waiting-container p {
             font-size: 15px;
             color: #666;
             margin-bottom: 8px;
             line-height: 1.5;
         }
-
+        
         .waiting-user-info {
             background: #f5f7ff;
             padding: 16px 20px;
@@ -464,29 +440,29 @@
             margin-top: 25px;
             display: inline-block;
         }
-
+        
         .waiting-user-info p {
             font-size: 14px;
             color: #555;
             margin-bottom: 4px;
         }
-
+        
         .waiting-user-info strong {
             color: #333;
         }
-
+        
         .start-quiz-btn {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
             font-size: 16px !important;
             padding: 14px 28px !important;
         }
-
+        
         .start-quiz-btn:hover {
             box-shadow: 0 10px 20px rgba(40, 167, 69, 0.35) !important;
         }
+        
 
-
-
+        
         .admin-quiz-status {
             padding: 12px 20px;
             border-radius: 6px;
@@ -495,38 +471,38 @@
             font-size: 14px;
             text-align: center;
         }
-
+        
         .admin-quiz-status.active {
             background: #d4edda;
             color: #155724;
         }
-
+        
         .admin-quiz-status.inactive {
             background: #f8d7da;
             color: #721c24;
         }
-
+        
         @media (max-width: 600px) {
             .content {
                 padding: 25px;
             }
-
+            
             .header h1 {
                 font-size: 22px;
             }
-
+            
             .quiz-buttons {
                 flex-direction: column;
             }
-
+            
             .admin-buttons {
                 flex-direction: column;
             }
-
+            
             .results-table {
                 font-size: 12px;
             }
-
+            
             .results-table th,
             .results-table td {
                 padding: 8px;
@@ -534,7 +510,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <!-- LOGIN SCREEN -->
@@ -565,8 +540,8 @@
             <div class="content">
                 <div class="waiting-container">
                     <div class="waiting-spinner"></div>
-                    <h2>⏳ Esperando</h2>
-                    <p>Tu registro fue exitoso. La prueba comenzará cuando se indique.</p>
+                    <h2>⏳ Esperando al Profesor</h2>
+                    <p>Tu registro fue exitoso. La prueba comenzará cuando el profesor lo indique.</p>
                     <p>Por favor, no cierres ni recargues esta página.</p>
                     <div class="waiting-user-info">
                         <p><strong>Nombre:</strong> <span id="waitingUsername"></span></p>
@@ -585,14 +560,13 @@
             <div class="content">
                 <div id="quizContainer" class="quiz-container">
                     <div class="question-header">
-                        <span class="question-number">Pregunta <span id="currentQuestion">1</span> de <span
-                                id="totalQuestions">10</span></span>
+                        <span class="question-number">Pregunta <span id="currentQuestion">1</span> de <span id="totalQuestions">10</span></span>
                         <div class="timer" id="timer">60s</div>
                     </div>
                     <div class="question-text" id="questionText"></div>
                     <div class="options" id="options"></div>
                 </div>
-
+                
                 <div class="quiz-buttons">
                     <button onclick="nextQuestion()">Siguiente →</button>
                 </div>
@@ -631,12 +605,11 @@
             </div>
             <div class="content">
                 <div id="quizStatusBanner" class="admin-quiz-status inactive">🔴 La prueba NO ha iniciado</div>
-
+                
                 <div style="margin-bottom: 25px;">
-                    <button id="startQuizBtn" onclick="adminStartQuiz()" class="start-quiz-btn">🚀 Iniciar Prueba para
-                        Todos</button>
+                    <button id="startQuizBtn" onclick="adminStartQuiz()" class="start-quiz-btn">🚀 Iniciar Prueba para Todos</button>
                 </div>
-
+                
                 <div class="admin-header">
                     <h2>Historial de Resultados</h2>
                     <div class="admin-buttons">
@@ -645,7 +618,7 @@
                         <button onclick="backToLogin()" style="background: #6c757d;">Salir</button>
                     </div>
                 </div>
-
+                
                 <div id="resultsTableContainer">
                     <!-- La tabla se genera con JavaScript -->
                 </div>
@@ -957,17 +930,17 @@
             question.options.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
                 optionDiv.className = 'option' + (state.answers[state.currentQuestionIndex] === index ? ' selected' : '');
-
+                
                 const radio = document.createElement('input');
                 radio.type = 'radio';
                 radio.name = 'answer';
                 radio.value = index;
                 radio.checked = state.answers[state.currentQuestionIndex] === index;
-
+                
                 const labelSpan = document.createElement('span');
                 labelSpan.className = 'option-label';
                 labelSpan.textContent = option;
-
+                
                 optionDiv.appendChild(radio);
                 optionDiv.appendChild(labelSpan);
 
@@ -983,14 +956,14 @@
 
         function selectOption(index) {
             state.answers[state.currentQuestionIndex] = index;
-
+            
             document.querySelectorAll('.option').forEach((option, i) => {
                 option.classList.remove('selected');
                 const radio = option.querySelector('input[type="radio"]');
                 if (radio) radio.checked = (i === index);
             });
             document.querySelectorAll('.option')[index].classList.add('selected');
-
+            
             // Actualizar estado de botones cuando se selecciona una respuesta
             updateButtonStates();
             saveSession();
@@ -1018,7 +991,7 @@
 
         function updateButtonStates() {
             const nextBtn = document.querySelector('.quiz-buttons button');
-
+            
             // El botón Siguiente se deshabilita si no hay respuesta seleccionada
             nextBtn.disabled = state.answers[state.currentQuestionIndex] === null;
         }
@@ -1246,5 +1219,4 @@
         }
     </script>
 </body>
-
 </html>
