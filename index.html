@@ -860,6 +860,14 @@
             }
 
             if (session.screen === 'quiz') {
+                // Si el tiempo ya se acabó, no dejar entrar al quiz
+                if (session.timeRemaining <= 0) {
+                    state.shuffledQuestions = session.shuffledQuestions;
+                    state.answers = session.answers;
+                    showResults();
+                    return;
+                }
+
                 state.shuffledQuestions = session.shuffledQuestions;
                 state.currentQuestionIndex = session.currentQuestionIndex;
                 state.answers = session.answers;
@@ -1131,8 +1139,8 @@
                 timestamp: Date.now()
             };
 
-            // Guardar en Firebase (Centralizado)
-            db.ref('results').push(result);
+            // Guardar en Firebase (Centralizado - Usando userId como clave para evitar duplicados)
+            db.ref('results/' + state.userId).set(result);
 
             saveSession();
             showResults();
@@ -1176,9 +1184,13 @@
             // Escuchar resultados de Firebase en tiempo real
             db.ref('results').on('value', (snapshot) => {
                 const results = [];
-                snapshot.forEach((childSnapshot) => {
-                    results.push(childSnapshot.val());
-                });
+                const data = snapshot.val();
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        results.push(data[key]);
+                    });
+                }
 
                 // Guardar para exportación
                 state.allResults = results;
