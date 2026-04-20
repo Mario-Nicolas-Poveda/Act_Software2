@@ -1240,10 +1240,10 @@
                 return;
             }
 
-            let csv = 'Nombre,ID,Calificación,Respuestas Correctas,Fecha y Hora\n';
+            let csv = 'Nombre,Identificacion,Calificacion\n';
 
             results.forEach(result => {
-                csv += `"${result.username}","${result.userId}",${result.score},${result.correctAnswers},"${result.date}"\n`;
+                csv += `"${result.username}","${result.userId}",${result.score}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
